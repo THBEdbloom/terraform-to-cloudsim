@@ -1,56 +1,74 @@
-# Terraform to CloudSim – Infrastructure Simulation Prototype
+# Terraform zu CloudSim – Prototyp zur Infrastruktursimulation
 
-## Overview
+## Überblick
 
-This project demonstrates a prototype pipeline that transforms Terraform-based cloud infrastructure definitions into a simulation model using CloudSim Plus.
+Dieses Projekt demonstriert eine prototypische Pipeline, die Terraform-basierte Cloud-Infrastrukturdefinitionen in ein Simulationsmodell mit CloudSim Plus überführt.
 
-The goal is to evaluate how infrastructure configurations (e.g., number of virtual machines, presence of database and storage services) influence application performance under different workloads.
+Ziel ist es, zu untersuchen, wie sich unterschiedliche Infrastrukturkonfigurationen (z. B. Anzahl von VMs, Vorhandensein von Datenbank- und Storage-Diensten) auf die Performance einer Anwendung unter verschiedenen Lastprofilen auswirken.
 
-The project is based on a simplified STACKIT BottleTube scenario and focuses on parsing Terraform configurations, mapping infrastructure resources to an internal model, simulating workloads, and exporting performance metrics.
+Als Beispiel dient ein vereinfachtes STACKIT BottleTube-Szenario.
 
 ---
 
 ## Motivation
 
-Cloud infrastructures defined via Terraform are usually deployed and tested in real environments.
+Cloud-Infrastrukturen werden üblicherweise mit Terraform definiert und anschließend direkt in realen Umgebungen bereitgestellt.
 
-This project explores an alternative approach:
+Dieses Projekt verfolgt einen alternativen Ansatz:
 
-Can infrastructure behavior be simulated before deployment?
+Kann das Verhalten einer Infrastruktur bereits vor der tatsächlichen Bereitstellung simuliert werden?
 
-By transforming Terraform configurations into a simulation model, it becomes possible to compare different architectures, evaluate performance under varying workloads, and identify potential bottlenecks early in the design phase.
+Durch die Transformation von Terraform-Konfigurationen in ein Simulationsmodell lassen sich:
 
----
-
-## Architecture
-
-The system follows a pipeline-based architecture with four main stages:
-
-1. Terraform Parsing  
-   All Terraform (.tf) files are loaded and analyzed. Variables, locals, and resource definitions are extracted.
-
-2. Context Resolution  
-   References such as var.*, local.*, and ${...} interpolations are resolved into concrete values.
-
-3. Infrastructure Mapping  
-   Terraform resources are transformed into an internal infrastructure model consisting of compute nodes, database nodes, storage nodes, and load balancers.
-
-4. Simulation (CloudSim Plus)  
-   The infrastructure model is translated into CloudSim entities such as virtual machines and cloudlets. Workloads are executed and performance metrics are collected.
+- verschiedene Architekturen vergleichen (z. B. 1 VM vs. 2 VMs)
+- Performance unter unterschiedlichen Lasten analysieren
+- potenzielle Engpässe frühzeitig erkennen
 
 ---
 
-## Project Structure
+## Architektur
+
+Das System ist als Pipeline aufgebaut und besteht aus vier Hauptphasen:
+
+1. **Terraform Parsing**  
+   Einlesen aller Terraform-Dateien und Extraktion von:
+   - Variablen
+   - Locals
+   - Ressourcen
+
+2. **Kontextauflösung**  
+   Auflösung von Referenzen wie:
+   - `var.*`
+   - `local.*`
+   - `${...}` (Interpolation)
+
+3. **Mapping auf Infrastrukturmodell**  
+   Transformation der Terraform-Ressourcen in interne Modellobjekte:
+   - Compute Nodes
+   - Database Nodes
+   - Storage Nodes
+   - Load Balancer
+
+4. **Simulation mit CloudSim Plus**  
+   Überführung des Infrastrukturmodells in:
+   - VMs
+   - Cloudlets (Requests)
+
+   Anschließend Durchführung der Simulation und Auswertung der Ergebnisse.
+
+---
+
+## Projektstruktur
 
 src/main/java/de/thb/cloudsim/
-- app/           → Application entry point
-- terraform/     → Terraform parsing and value resolution
-- mapping/       → Transformation to infrastructure model
-- model/         → Infrastructure domain model
-- simulation/    → CloudSim integration
-- workload/      → Workload definitions
-- scenario/      → Scenario execution logic
-- reporting/     → CSV export and reporting
+- app/           → Einstiegspunkt (Main-Klasse)
+- terraform/     → Parsing & Auflösung von Terraform
+- mapping/       → Transformation in Infrastrukturmodell
+- model/         → Domänenmodell (Nodes etc.)
+- simulation/    → CloudSim-Anbindung
+- workload/      → Lastprofile
+- scenario/      → Szenarioausführung
+- reporting/     → CSV-Export
 
 terraform-testdata/
 - bottletube-mvp/
@@ -65,65 +83,73 @@ results/
 
 ---
 
-## Supported Terraform Features
+## Unterstützte Terraform-Features
 
-Supported resources:
-- stackit_server (mapped to compute nodes)
-- stackit_postgresqlflex_instance (mapped to database nodes)
-- stackit_objectstorage_bucket (mapped to storage nodes)
-- stackit_loadbalancer (mapped to load balancers)
+### Unterstützte Ressourcen
 
-Supported features:
-- variable defaults
-- locals
-- simple interpolation (var.*, local.*, ${...})
+- `stackit_server` → Compute Nodes
+- `stackit_postgresqlflex_instance` → Datenbankinstanzen
+- `stackit_objectstorage_bucket` → Storage
+- `stackit_loadbalancer` → Load Balancer
 
----
+### Unterstützte Funktionen
 
-## Limitations
-
-This project is a research prototype and does not implement a full Terraform evaluation engine.
-
-Not supported:
-- modules
-- count / for_each
-- dynamic blocks
-- full nested block semantics
-- complete STACKIT provider support
-
-Simplifications:
-- database usage is modeled as additional request latency
-- object storage is modeled as additional request latency
-- load balancing is abstracted via CloudSim scheduling
-- network latency is not explicitly modeled
-
-Unsupported resources are ignored and reported in the import report.
+- Variablen mit Default-Werten
+- Locals
+- einfache Interpolation (`var.*`, `local.*`, `${...}`)
 
 ---
 
-## Workload Model
+## Einschränkungen
 
-The system simulates a simplified BottleTube-like application with different request types:
+Dieses Projekt ist ein Forschungsprototyp und keine vollständige Terraform-Engine.
+
+### Nicht unterstützt
+
+- Module
+- `count` / `for_each`
+- dynamische Blöcke
+- komplexe verschachtelte Strukturen
+- vollständiger STACKIT-Provider-Support
+
+### Vereinfachungen
+
+- Datenbank → als zusätzliche Latenz modelliert
+- Object Storage → als zusätzliche Latenz modelliert
+- Load Balancer → abstrahiert über Scheduling
+- Netzwerk → nicht modelliert
+
+Nicht unterstützte Ressourcen werden ignoriert und im Import-Report dokumentiert.
+
+---
+
+## Workload-Modell
+
+Es wird eine vereinfachte BottleTube-Anwendung simuliert mit folgenden Request-Typen:
 
 - STATIC_ASSET
 - GALLERY_VIEW
 - IMAGE_DETAIL
 - IMAGE_UPLOAD
 
-Each request type is modeled as a CloudSim Cloudlet with:
-- base processing length
-- optional penalties for database and storage usage
+Jeder Request wird als Cloudlet modelliert mit:
 
-Three workload profiles are defined:
+- Basis-Rechenaufwand
+- optionalen Zusatzkosten für:
+  - Datenbankzugriffe
+  - Storage-Zugriffe
+
+### Lastprofile
+
 - Light
 - Medium
 - Heavy
 
 ---
 
-## Simulation Scenarios
+## Simulationsszenarien
 
-The following scenarios are executed:
+Es werden folgende Szenarien untersucht:
 
 - 1 VM – Light
 - 2 VM – Light
@@ -132,11 +158,9 @@ The following scenarios are executed:
 - 1 VM – Heavy
 - 2 VM – Heavy
 
-Each scenario compares infrastructure size and workload intensity.
-
 ---
 
-## Example Results
+## Beispielergebnisse
 
 1 VM – Light:    Avg = 8.665   Max = 12.378  
 2 VM – Light:    Avg = 5.495   Max = 8.710  
@@ -147,66 +171,68 @@ Each scenario compares infrastructure size and workload intensity.
 1 VM – Heavy:    Avg = 52.778  Max = 73.712  
 2 VM – Heavy:    Avg = 26.493  Max = 37.003  
 
-Key observation:
-Horizontal scaling (increasing the number of virtual machines) significantly reduces processing time across all workload levels.
+### Zentrale Erkenntnis
+
+Horizontale Skalierung (mehr VMs) reduziert die Bearbeitungszeiten signifikant über alle Laststufen hinweg.
 
 ---
 
-## How to Run
+## Ausführung
 
-Requirements:
+### Voraussetzungen
+
 - Java 21
 - Maven
 
-Run the application:
+### Start
 
 mvn clean compile  
 mvn exec:java -Dexec.mainClass="de.thb.cloudsim.app.App"
 
 ---
 
-## Input Data
+## Eingabedaten
 
-Terraform files are located in:
+Terraform-Dateien befinden sich in:
 
 terraform-testdata/bottletube-mvp/
 
-These files serve as input for parsing and simulation.
+Diese dienen als Input für Parsing und Simulation.
 
-Note:
-Not all Terraform resources are supported. Unsupported resources are ignored and listed in the import report.
+Hinweis:
+Nicht alle Terraform-Ressourcen werden unterstützt.
 
 ---
 
-## Output
+## Ausgabe
 
-Simulation results are exported as CSV files:
+Die Simulation erzeugt CSV-Dateien:
 
 results/simulation-results.csv  
 results/capability-report.csv  
 
 ---
 
-## Key Contribution
+## Beitrag des Projekts
 
-This project provides:
+Dieses Projekt liefert:
 
-- a prototype pipeline from Terraform to simulation
-- a mapping approach for cloud infrastructure to CloudSim
-- a framework for comparing infrastructure architectures under different workloads
-
----
-
-## Future Work
-
-- support for additional Terraform features (modules, loops)
-- more accurate database and network modeling
-- integration with real cloud metrics
-- automated scenario generation
+- eine Pipeline von Terraform zu Simulation
+- ein Mapping-Konzept für Cloud-Infrastruktur → CloudSim
+- ein Framework zur Bewertung von Architekturentscheidungen
 
 ---
 
-## Author
+## Zukünftige Arbeiten
+
+- Unterstützung weiterer Terraform-Features
+- genauere Modellierung von Datenbank- und Netzwerkverhalten
+- Integration realer Cloud-Metriken
+- automatische Generierung von Szenarien
+
+---
+
+## Autor
 
 Laurin Krüger  
-Master Project – Technische Hochschule Brandenburg
+Masterprojekt – Technische Hochschule Brandenburg
