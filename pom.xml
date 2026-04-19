@@ -1,0 +1,68 @@
+<!---
+     MAVEN PROJECT CONFIGURATION (pom.xml)
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <!-- Version des Maven-Modells -->
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Projekt-Metadaten -->
+  <groupId>de.thb.cloudsim</groupId>
+  <!-- → logische Gruppierung (ähnlich wie Package Namespace) -->
+
+  <artifactId>cloudsim-demo</artifactId>
+  <!-- → Name des erzeugten Artefakts (Jar-Datei) -->
+
+  <version>1.0-SNAPSHOT</version>
+  <!-- → SNAPSHOT = Entwicklungsstand (noch keine finale Version) -->
+
+  <!---
+       BUILD PROPERTIES
+ -->
+  <properties>
+    <!-- Java-Version für Compiler -->
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <!-- → dein Projekt nutzt Java 21 -->
+
+    <!-- Encoding für Source-Files -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <!---
+       DEPENDENCIES (Bibliotheken)
+ -->
+  <dependencies>
+
+    <!-- CloudSim Plus -->
+    <dependency>
+      <groupId>org.cloudsimplus</groupId>
+      <artifactId>cloudsimplus</artifactId>
+      <version>8.5.7</version>
+    </dependency>
+    <!-- → zentrale Simulationsbibliothek
+         → stellt bereit:
+            - CloudSim Engine
+            - Datacenter, VM, Cloudlet Modelle
+            - Scheduling & Ressourcenverwaltung
+         → wird in deiner Pipeline für die eigentliche Simulation genutzt -->
+
+    <!-- Gson (JSON Library) -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10.1</version>
+    </dependency>
+    <!-- → JSON-Verarbeitung
+         → aktuell vermutlich optional / vorbereitet
+         → kann genutzt werden für:
+            - Export von Simulationsergebnissen
+            - Serialisierung von Infrastrukturmodellen
+            - zukünftige API-Integration -->
+
+  </dependencies>
+
+</project>

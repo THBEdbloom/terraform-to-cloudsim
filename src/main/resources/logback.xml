@@ -1,0 +1,54 @@
+<!--
+    Logback-Konfigurationsdatei für das Projekt.
+
+    Zweck:
+    → Steuerung des Logging-Verhaltens (z. B. CloudSim + eigene Logs)
+    → Reduziert die Ausgabe auf das Wesentliche
+
+    WICHTIG:
+    → Diese Konfiguration sorgt dafür, dass CloudSim nicht "spamt"
+    → Nur relevante Ausgaben werden angezeigt
+-->
+
+<configuration debug="false">
+
+    <!--
+        Deaktiviert interne Logback-Statusmeldungen.
+        → Verhindert zusätzliche Debug-Ausgaben beim Start
+    -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!--
+        Console Appender:
+        → Gibt Logs in der Konsole aus (stdout)
+    -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+
+        <!--
+            Encoder definiert das Ausgabeformat
+            %msg = nur die eigentliche Nachricht
+            %n   = neue Zeile
+
+            → KEINE Zeitstempel, KEINE Log-Level → sehr clean
+        -->
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        Root Logger:
+        → Globales Logging-Level für alle Bibliotheken (inkl. CloudSim)
+
+        level="WARN":
+        → Nur WARN und ERROR werden angezeigt
+        → INFO (z. B. CloudSim Startlogs) werden unterdrückt
+
+        Ergebnis:
+        → Saubere, minimalistische Ausgabe
+    -->
+    <root level="WARN">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
