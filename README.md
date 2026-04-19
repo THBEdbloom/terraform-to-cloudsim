@@ -210,3 +210,37 @@ This project provides:
 
 Laurin Krüger  
 Master Project – Technische Hochschule Brandenburg
+
+## Architektur
+
+Terraform Files (.tf)
+        │
+        ▼
+TerraformLoader
+        │
+        ▼
+TerraformContextParser
+        │
+        ▼
+TerraformResourceParser
+        │
+        ▼
+TerraformValueResolver
+        │
+        ▼
+TerraformToInfrastructureMapper
+        │
+        ▼
+InfrastructureModel
+        │
+        ▼
+InfrastructureToCloudSim
+        │
+        ▼
+CloudSim Simulation
+        │
+        ▼
+SimulationSummary
+        │
+        ▼
+ResultExporter (CSV)
