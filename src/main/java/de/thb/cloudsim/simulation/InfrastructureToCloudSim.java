@@ -1,6 +1,7 @@
 package de.thb.cloudsim.simulation;
 
 import de.thb.cloudsim.model.ComputeNode;
+import de.thb.cloudsim.model.DatabaseNode;
 import de.thb.cloudsim.model.InfrastructureModel;
 import de.thb.cloudsim.workload.RequestProfile;
 import de.thb.cloudsim.workload.WorkloadProfile;
@@ -23,210 +24,181 @@ import org.cloudsimplus.vms.VmSimple;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Diese Klasse ist der Kern der Transformation:
- *
- * → Sie überführt das abstrakte Infrastrukturmodell in eine konkrete CloudSim-Simulation.
- *
- * Pipeline:
- * InfrastructureModel → VMs + Cloudlets → CloudSim → Ergebnisse
- *
- * Wichtig:
- * Hier findet die eigentliche "Terraform → Simulation"-Abbildung statt.
- */
 public class InfrastructureToCloudSim {
 
-    /**
-     * Führt eine komplette Simulation aus.
-     *
-     * Schritte:
-     * 1. CloudSim initialisieren
-     * 2. Datacenter erstellen
-     * 3. Broker erstellen
-     * 4. VMs aus Infrastruktur erzeugen
-     * 5. Cloudlets aus Workload erzeugen
-     * 6. Simulation starten
-     * 7. Ergebnisse auswerten
-     */
     public static SimulationSummary runSimulation(InfrastructureModel model, WorkloadProfile workload) {
-
-        // Simulationsumgebung initialisieren
         CloudSimPlus simulation = new CloudSimPlus();
 
-        // Rechenzentrum erstellen (physische Infrastruktur)
-        Datacenter datacenter = createDatacenter(simulation);
-
-        // Broker = Vermittler zwischen VMs und Cloudlets
+        createDatacenter(simulation);
         DatacenterBrokerSimple broker = new DatacenterBrokerSimple(simulation);
 
-        // VMs aus Terraform-Infrastruktur erzeugen
-        List<Vm> vmList = createVmsFromInfrastructure(model);
+        List<Vm> appVms = createAppVms(model);
+        List<Vm> dbVms = createDatabaseVms(model);
 
-        // Workload in Cloudlets übersetzen
-        List<Cloudlet> cloudletList = createCloudlets(model, workload);
+        List<Vm> allVms = new ArrayList<>();
+        allVms.addAll(appVms);
+        allVms.addAll(dbVms);
 
-        // VMs und Aufgaben beim Broker registrieren
-        broker.submitVmList(vmList);
-        broker.submitCloudletList(cloudletList);
+        List<RequestExecution> requests = createRequestExecutions(model, workload, appVms, dbVms);
 
-        // Simulation starten
-        simulation.start();
-
-        // Ergebnisliste der abgeschlossenen Cloudlets
-        List<Cloudlet> finishedCloudlets = broker.getCloudletFinishedList();
-
-        // Optional: detaillierte Ausgabe
-        if (SimulationConfig.PRINT_CLOUDLET_DETAILS) {
-            System.out.println("\n--- CLOUDSIM RESULTS ---\n");
-            for (Cloudlet cloudlet : finishedCloudlets) {
-                System.out.println("Cloudlet " + cloudlet.getId()
-                        + " finished on VM " + cloudlet.getVm().getId()
-                        + " | status=" + cloudlet.getStatus()
-                        + " | finish=" + cloudlet.getFinishTime());
-            }
+        List<Cloudlet> allCloudlets = new ArrayList<>();
+        for (RequestExecution request : requests) {
+            allCloudlets.add(request.appCloudlet());
+            allCloudlets.addAll(request.dbCloudlets());
         }
 
-        // Kennzahlen berechnen
+        broker.submitVmList(allVms);
+        broker.submitCloudletList(allCloudlets);
+
+        simulation.start();
+
         double totalFinishTime = 0.0;
         double maxFinishTime = 0.0;
 
-        for (Cloudlet cloudlet : finishedCloudlets) {
-            double finishTime = cloudlet.getFinishTime();
-            totalFinishTime += finishTime;
+        for (RequestExecution request : requests) {
+            double requestFinishTime = request.appCloudlet().getFinishTime();
 
-            // Maximum bestimmen (schlechtester Fall)
-            if (finishTime > maxFinishTime) {
-                maxFinishTime = finishTime;
+            for (Cloudlet dbCloudlet : request.dbCloudlets()) {
+                requestFinishTime = Math.max(requestFinishTime, dbCloudlet.getFinishTime());
+            }
+
+            totalFinishTime += requestFinishTime;
+
+            if (requestFinishTime > maxFinishTime) {
+                maxFinishTime = requestFinishTime;
             }
         }
 
-        // Durchschnitt berechnen
-        double averageFinishTime = finishedCloudlets.isEmpty()
+        double averageFinishTime = requests.isEmpty()
                 ? 0.0
-                : totalFinishTime / finishedCloudlets.size();
+                : totalFinishTime / requests.size();
 
-        // Zusammenfassung zurückgeben
         return new SimulationSummary(
-                vmList.size(),
-                finishedCloudlets.size(),
+                appVms.size(),
+                requests.size(),
                 averageFinishTime,
                 maxFinishTime
         );
     }
 
-    /**
-     * Erstellt ein einfaches Datacenter (physische Hosts).
-     *
-     * Aktuell:
-     * - 1 Host
-     * - 8 CPU-Kerne
-     * - fixe Ressourcen
-     *
-     * Einschränkung:
-     * → nicht aus Terraform abgeleitet (statisch)
-     */
     private static Datacenter createDatacenter(CloudSimPlus simulation) {
-
-        List<Host> hostList = new ArrayList<>();
-
-        // CPU-Kerne erstellen
         List<Pe> peList = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
-            peList.add(new PeSimple(3000)); // 3000 MIPS pro Kern
+            peList.add(new PeSimple(3000));
         }
 
-        // Host mit RAM, Bandbreite und Storage
         Host host = new HostSimple(16384, 10000, 1_000_000, peList);
-
-        // Scheduler bestimmt, wie VMs CPU teilen
         host.setVmScheduler(new VmSchedulerTimeShared());
 
-        hostList.add(host);
-
-        // Datacenter erstellen
-        return new DatacenterSimple(simulation, hostList, new VmAllocationPolicySimple());
+        return new DatacenterSimple(
+                simulation,
+                List.of(host),
+                new VmAllocationPolicySimple()
+        );
     }
 
-    /**
-     * Wandelt ComputeNodes in CloudSim-VMs um.
-     *
-     * → zentrale Abbildung: Terraform → Simulation
-     */
-    private static List<Vm> createVmsFromInfrastructure(InfrastructureModel model) {
-
+    private static List<Vm> createAppVms(InfrastructureModel model) {
         List<Vm> vmList = new ArrayList<>();
         int vmId = 0;
 
         for (ComputeNode node : model.getComputeNodes()) {
-
             String flavor = node.getFlavor();
 
-            // Hardwareparameter aus Flavor ableiten
-            int pes = FlavorMapper.getPes(flavor);        // CPU-Kerne
-            long ram = FlavorMapper.getRamMb(flavor);     // RAM
-            long bw = FlavorMapper.getBw(flavor);         // Netzwerk
-            long size = FlavorMapper.getSizeMb(flavor);   // Disk
-            long mips = FlavorMapper.getMipsPerPe(flavor);// CPU-Leistung
+            Vm vm = new VmSimple(
+                    vmId++,
+                    FlavorMapper.getMipsPerPe(flavor),
+                    FlavorMapper.getPes(flavor)
+            );
 
-            // VM erzeugen
-            Vm vm = new VmSimple(vmId++, mips, pes);
+            vm.setRam(FlavorMapper.getRamMb(flavor))
+                    .setBw(FlavorMapper.getBw(flavor))
+                    .setSize(FlavorMapper.getSizeMb(flavor));
 
-            vm.setRam(ram)
-                    .setBw(bw)
-                    .setSize(size);
-
-            // Scheduler bestimmt, wie Tasks auf VM laufen
             vm.setCloudletScheduler(new CloudletSchedulerTimeShared());
-
             vmList.add(vm);
         }
 
         return vmList;
     }
 
-    /**
-     * Wandelt Workload in Cloudlets (Tasks) um.
-     *
-     * Wichtig:
-     * → Hier wird Infrastrukturverhalten simuliert
-     *   (DB / Storage beeinflussen Laufzeit)
-     */
-    private static List<Cloudlet> createCloudlets(InfrastructureModel model, WorkloadProfile workload) {
+    private static List<Vm> createDatabaseVms(InfrastructureModel model) {
+        List<Vm> dbVms = new ArrayList<>();
+        int vmId = 1000;
 
-        List<Cloudlet> cloudletList = new ArrayList<>();
+        for (DatabaseNode ignored : model.getDatabaseNodes()) {
+            Vm dbVm = new VmSimple(vmId++, 1200, 1);
+
+            dbVm.setRam(2048)
+                    .setBw(500)
+                    .setSize(20_000);
+
+            dbVm.setCloudletScheduler(new CloudletSchedulerTimeShared());
+            dbVms.add(dbVm);
+        }
+
+        return dbVms;
+    }
+
+    private static List<RequestExecution> createRequestExecutions(
+            InfrastructureModel model,
+            WorkloadProfile workload,
+            List<Vm> appVms,
+            List<Vm> dbVms
+    ) {
+        List<RequestExecution> requests = new ArrayList<>();
+
         int cloudletId = 0;
+        int requestIndex = 0;
 
         for (RequestProfile requestProfile : workload.getRequestProfiles()) {
-
-            // Basis-Rechenaufwand
-            long length = requestProfile.getBaseLength();
-
-            // Datenbank vorhanden → zusätzlicher Aufwand
-            if (!model.getDatabaseNodes().isEmpty()) {
-                length += requestProfile.getDbPenalty();
-            }
-
-            // Storage vorhanden → zusätzlicher Aufwand
-            if (!model.getStorageNodes().isEmpty()) {
-                length += requestProfile.getStoragePenalty();
-            }
-
-            // Für jede Anfrage ein Cloudlet erzeugen
             for (int i = 0; i < requestProfile.getCount(); i++) {
+                Vm appVm = appVms.get(requestIndex % appVms.size());
 
-                Cloudlet cloudlet = new CloudletSimple(
+                long appLength = requestProfile.getBaseLength();
+
+                if (!model.getStorageNodes().isEmpty()) {
+                    appLength += requestProfile.getStoragePenalty();
+                }
+
+                Cloudlet appCloudlet = new CloudletSimple(
                         cloudletId++,
-                        length,
+                        appLength,
                         requestProfile.getPes()
                 );
 
-                // Größe der Daten (I/O)
-                cloudlet.setSizes(requestProfile.getCloudletSize());
+                appCloudlet.setSizes(requestProfile.getCloudletSize());
+                appCloudlet.setVm(appVm);
 
-                cloudletList.add(cloudlet);
+                List<Cloudlet> dbCloudlets = new ArrayList<>();
+
+                if (!dbVms.isEmpty()) {
+                    for (int q = 0; q < requestProfile.getDbQueryCount(); q++) {
+                        Vm dbVm = dbVms.get(q % dbVms.size());
+
+                        Cloudlet dbCloudlet = new CloudletSimple(
+                                cloudletId++,
+                                requestProfile.getDbQueryLength(),
+                                1
+                        );
+
+                        dbCloudlet.setSizes(512);
+                        dbCloudlet.setVm(dbVm);
+
+                        dbCloudlets.add(dbCloudlet);
+                    }
+                }
+
+                requests.add(new RequestExecution(appCloudlet, dbCloudlets));
+                requestIndex++;
             }
         }
 
-        return cloudletList;
+        return requests;
+    }
+
+    private record RequestExecution(
+            Cloudlet appCloudlet,
+            List<Cloudlet> dbCloudlets
+    ) {
     }
 }

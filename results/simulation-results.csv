@@ -1,7 +1,7 @@
 scenario,architecture,workload,vm_count,finished_cloudlets,static_asset_count,gallery_view_count,image_detail_count,image_upload_count,average_finish_time,max_finish_time
-1 VM - Light,1 VM,Light,1,4,1,2,0,1,11.444,16.300
-2 VM - Light,2 VM,Light,2,4,1,2,0,1,7.266,11.543
-1 VM - Medium,1 VM,Medium,1,12,3,5,2,2,33.428,45.792
-2 VM - Medium,2 VM,Medium,2,12,3,5,2,2,17.242,26.457
-1 VM - Heavy,1 VM,Heavy,1,24,6,8,4,6,70.280,98.134
-2 VM - Heavy,2 VM,Heavy,2,24,6,8,4,6,35.228,49.216
+1 VM - Light,1 VM,Light,1,4,1,2,0,1,9.781,13.555
+2 VM - Light,2 VM,Light,2,4,1,2,0,1,9.145,13.657
+1 VM - Medium,1 VM,Medium,1,12,3,5,2,2,28.511,38.607
+2 VM - Medium,2 VM,Medium,2,12,3,5,2,2,24.870,38.733
+1 VM - Heavy,1 VM,Heavy,1,24,6,8,4,6,61.144,87.960
+2 VM - Heavy,2 VM,Heavy,2,24,6,8,4,6,55.029,87.960

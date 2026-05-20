@@ -213,8 +213,9 @@ public class App {
             System.out.println("Type: " + profile.getRequestType()
                     + " | count=" + profile.getCount()
                     + " | baseLength=" + profile.getBaseLength()
-                    + " | dbPenalty=" + profile.getDbPenalty()
-                    + " | storagePenalty=" + profile.getStoragePenalty());
+                    + " | storagePenalty=" + profile.getStoragePenalty()
+                    + " | dbQueries=" + profile.getDbQueryCount()
+                    + " | dbQueryLength=" + profile.getDbQueryLength());
         }
 
         // Eigentliche CloudSim-Simulation starten.

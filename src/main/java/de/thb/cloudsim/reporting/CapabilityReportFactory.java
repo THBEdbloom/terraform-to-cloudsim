@@ -44,7 +44,7 @@ public class CapabilityReportFactory {
                 ),
                 List.of(
                         "EC2 instances as CloudSim VMs",
-                        "RDS presence as additional request penalty",
+                        "RDS modeled as separate CloudSim VM with database query cloudlets",
                         "S3 presence as additional request penalty",
                         "Horizontal scaling through VM count",
                         "Mixed BottleTube request types"
@@ -52,7 +52,7 @@ public class CapabilityReportFactory {
                 List.of(
                         "No full Terraform evaluation engine",
                         "No complete AWS provider support",
-                        "No exact RDS service emulation",
+                        "Simplified RDS model without exact AWS internals",
                         "No exact S3 or network latency model",
                         "Load balancer is abstracted via broker scheduling",
                         "Unsupported resources are ignored, not transformed"
