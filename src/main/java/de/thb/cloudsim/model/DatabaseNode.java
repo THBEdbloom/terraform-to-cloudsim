@@ -2,7 +2,7 @@ package de.thb.cloudsim.model;
 
 /**
  * Repräsentiert eine Datenbank-Instanz aus Terraform
- * (z. B. stackit_postgresqlflex_instance) im internen Infrastrukturmodell.
+ * (z. B. aws_db_instance) im internen Infrastrukturmodell.
  *
  * Diese Klasse ist eine abstrahierte Darstellung einer Datenbankressource
  * und dient als Grundlage für die Simulation.

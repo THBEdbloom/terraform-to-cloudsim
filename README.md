@@ -6,7 +6,7 @@ This project demonstrates a prototype pipeline that transforms Terraform-based c
 
 The goal is to evaluate how infrastructure configurations (e.g., number of virtual machines, presence of database and storage services) influence application performance under different workloads.
 
-The project is based on a simplified STACKIT BottleTube scenario and focuses on parsing Terraform configurations, mapping infrastructure resources to an internal model, simulating workloads, and exporting performance metrics.
+The project is based on a simplified AWS BottleTube scenario and focuses on parsing Terraform configurations, mapping infrastructure resources to an internal model, simulating workloads, and exporting performance metrics.
 
 ---
 
@@ -68,10 +68,10 @@ results/
 ## Supported Terraform Features
 
 Supported resources:
-- stackit_server (mapped to compute nodes)
-- stackit_postgresqlflex_instance (mapped to database nodes)
-- stackit_objectstorage_bucket (mapped to storage nodes)
-- stackit_loadbalancer (mapped to load balancers)
+- aws_instance (mapped to compute nodes)
+- aws_db_instance (mapped to database nodes)
+- aws_s3_bucket (mapped to storage nodes)
+- aws_lb (mapped to load balancers)
 
 Supported features:
 - variable defaults
@@ -89,7 +89,7 @@ Not supported:
 - count / for_each
 - dynamic blocks
 - full nested block semantics
-- complete STACKIT provider support
+- complete AWS provider support
 
 Simplifications:
 - database usage is modeled as additional request latency

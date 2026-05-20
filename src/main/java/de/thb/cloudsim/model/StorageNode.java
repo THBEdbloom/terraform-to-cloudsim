@@ -4,7 +4,7 @@ package de.thb.cloudsim.model;
  * Repräsentiert einen Object Storage / Bucket aus der Infrastruktur.
  *
  * Beispiel (Terraform):
- * → stackit_objectstorage_bucket
+ * → aws_s3_bucket
  *
  * Zweck:
  * → Abbildung von Storage-Komponenten im Infrastrukturmodell

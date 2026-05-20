@@ -2,7 +2,7 @@ package de.thb.cloudsim.model;
 
 /**
  * Repräsentiert einen Compute-Knoten aus Terraform
- * (z. B. stackit_server) im internen Infrastrukturmodell.
+ * (z. B. aws_instance) im internen Infrastrukturmodell.
  *
  * Diese Klasse dient als Abstraktionsebene zwischen
  * Terraform und CloudSim.

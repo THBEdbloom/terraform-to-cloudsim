@@ -37,7 +37,7 @@ public class App {
 
         // Pfad zum Terraform-Testprojekt.
         // Hier liegen die .tf-Dateien, die eingelesen werden sollen.
-        String terraformPath = "terraform-testdata/bottletube-mvp";
+        String terraformPath = "terraform-testdata/bottletube-mvp-aws";
 
         // 1. Alle Terraform-Dateien aus dem Zielordner laden.
         // Ergebnis: Liste mit Datei-Inhalten als Strings.

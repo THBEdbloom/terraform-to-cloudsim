@@ -35,7 +35,7 @@ public class TerraformToInfrastructureMapper {
         InfrastructureModel model = new InfrastructureModel();
 
         for (TerraformResource resource : resources) {
-            String type = resource.getType();                 // z. B. stackit_server
+            String type = resource.getType();                 // z. B. aws_instance
             Map<String, String> attrs = resource.getAttributes();
 
             /**
@@ -50,9 +50,9 @@ public class TerraformToInfrastructureMapper {
                 /**
                  * Compute → wird zu VM in CloudSim
                  */
-                case "stackit_server" -> {
-                    String name = getEffectiveName(resource);
-                    String flavor = attrs.getOrDefault("flavor", "unknown");
+                case "aws_instance" -> {
+                    String name = attrs.getOrDefault("name", resource.getName());
+                    String flavor = attrs.getOrDefault("instance_type", "unknown");
                     String region = attrs.getOrDefault("region", "unknown");
 
                     model.getComputeNodes().add(new ComputeNode(name, flavor, region));
@@ -66,11 +66,11 @@ public class TerraformToInfrastructureMapper {
                  * → erzeugt KEINE eigene Ressource
                  * → sondern beeinflusst Request-Laufzeiten (Penalty)
                  */
-                case "stackit_postgresqlflex_instance" -> {
-                    String name = getEffectiveName(resource);
-                    String flavor = attrs.getOrDefault("flavor", "unknown");
-                    String instanceType = attrs.getOrDefault("instance_type", "unknown");
-                    int diskSize = parseIntOrDefault(attrs.get("disk_size"), 0);
+                case "aws_db_instance" -> {
+                    String name = attrs.getOrDefault("identifier", resource.getName());
+                    String flavor = attrs.getOrDefault("instance_class", "unknown");
+                    String instanceType = attrs.getOrDefault("engine", "unknown");
+                    int diskSize = parseIntOrDefault(attrs.get("allocated_storage"), 0);
 
                     model.getDatabaseNodes().add(new DatabaseNode(name, flavor, instanceType, diskSize));
                     model.getImportReport().incrementSupportedResources();
@@ -82,8 +82,8 @@ public class TerraformToInfrastructureMapper {
                  * In Simulation:
                  * → beeinflusst ebenfalls nur Laufzeiten (Penalty)
                  */
-                case "stackit_objectstorage_bucket" -> {
-                    String name = getEffectiveName(resource);
+                case "aws_s3_bucket" -> {
+                    String name = attrs.getOrDefault("bucket", resource.getName());
 
                     model.getStorageNodes().add(new StorageNode(name));
                     model.getImportReport().incrementSupportedResources();
@@ -96,9 +96,9 @@ public class TerraformToInfrastructureMapper {
                  * → keine echte Routing-Logik
                  * → wird indirekt über Broker-Verteilung simuliert
                  */
-                case "stackit_loadbalancer" -> {
-                    String name = getEffectiveName(resource);
-                    String lbType = attrs.getOrDefault("type", "unknown");
+                case "aws_lb" -> {
+                    String name = attrs.getOrDefault("name", resource.getName());
+                    String lbType = attrs.getOrDefault("load_balancer_type", "unknown");
 
                     model.getLoadBalancers().add(new LoadBalancerNode(name, lbType));
                     model.getImportReport().incrementSupportedResources();
@@ -111,9 +111,9 @@ public class TerraformToInfrastructureMapper {
                  */
                 default -> {
                     model.getImportReport().incrementIgnoredResources();
-
                     model.getImportReport().addWarning(
-                            "Resource type '" + type + "' with name '" + resource.getName() + "' is currently not supported and was ignored."
+                            "Resource type '" + type + "' with name '" + resource.getName()
+                                    + "' is currently not supported and was ignored."
                     );
                 }
             }
@@ -126,23 +126,6 @@ public class TerraformToInfrastructureMapper {
     }
 
     /**
-     * Bestimmt den effektiven Namen einer Ressource.
-     *
-     * Priorität:
-     * 1. Attribut "name"
-     * 2. Terraform interner Name
-     */
-    private static String getEffectiveName(TerraformResource resource) {
-        String attributeName = resource.getAttributes().get("name");
-
-        if (attributeName != null && !attributeName.isBlank()) {
-            return attributeName;
-        }
-
-        return resource.getName();
-    }
-
-    /**
      * Validiert das Infrastrukturmodell.
      *
      * Ziel:
@@ -152,27 +135,19 @@ public class TerraformToInfrastructureMapper {
     private static void validateModel(InfrastructureModel model) {
 
         if (model.getComputeNodes().isEmpty()) {
-            model.getImportReport().addWarning(
-                    "No compute nodes were detected. Simulation may not run meaningfully."
-            );
+            model.getImportReport().addWarning("No compute nodes were detected. Simulation may not run meaningfully.");
         }
 
         if (model.getLoadBalancers().isEmpty()) {
-            model.getImportReport().addWarning(
-                    "No load balancer was detected."
-            );
+            model.getImportReport().addWarning("No load balancer was detected.");
         }
 
         if (model.getDatabaseNodes().isEmpty()) {
-            model.getImportReport().addWarning(
-                    "No database node was detected."
-            );
+            model.getImportReport().addWarning("No database node was detected.");
         }
 
         if (model.getStorageNodes().isEmpty()) {
-            model.getImportReport().addWarning(
-                    "No storage node was detected."
-            );
+            model.getImportReport().addWarning("No storage node was detected.");
         }
     }
 

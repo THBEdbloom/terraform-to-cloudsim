@@ -2,7 +2,7 @@ package de.thb.cloudsim.model;
 
 /**
  * Repräsentiert einen Load Balancer aus Terraform
- * (z. B. stackit_loadbalancer) im internen Infrastrukturmodell.
+ * (z. B. aws_lb) im internen Infrastrukturmodell.
  *
  * Zweck:
  * → Abbildung von Traffic-Verteilungskomponenten

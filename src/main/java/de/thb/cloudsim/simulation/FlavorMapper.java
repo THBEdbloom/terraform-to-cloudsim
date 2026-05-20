@@ -21,9 +21,11 @@ public class FlavorMapper {
      */
     public static int getPes(String flavor) {
         return switch (flavor) {
-            case "g1.2" -> 2;   // kleiner Instanztyp → 2 Kerne
-            case "g1.4" -> 4;   // größerer Instanztyp → 4 Kerne
-            default -> 2;       // Fallback für unbekannte Flavors
+            case "t3.micro" -> 2;
+            case "t3.small" -> 2;
+            case "t3.medium" -> 2;
+            case "t3.large" -> 2;
+            default -> 2;
         };
     }
 
@@ -36,9 +38,11 @@ public class FlavorMapper {
      */
     public static long getRamMb(String flavor) {
         return switch (flavor) {
-            case "g1.2" -> 4096;   // 4 GB RAM
-            case "g1.4" -> 8192;   // 8 GB RAM
-            default -> 2048;       // Fallback (2 GB)
+            case "t3.micro" -> 1024;
+            case "t3.small" -> 2048;
+            case "t3.medium" -> 4096;
+            case "t3.large" -> 8192;
+            default -> 2048;
         };
     }
 
@@ -53,8 +57,10 @@ public class FlavorMapper {
      */
     public static long getBw(String flavor) {
         return switch (flavor) {
-            case "g1.2" -> 1000;
-            case "g1.4" -> 2000;
+            case "t3.micro" -> 500;
+            case "t3.small" -> 750;
+            case "t3.medium" -> 1000;
+            case "t3.large" -> 1500;
             default -> 1000;
         };
     }
@@ -68,9 +74,11 @@ public class FlavorMapper {
      */
     public static long getSizeMb(String flavor) {
         return switch (flavor) {
-            case "g1.2" -> 40_000;   // 40 GB
-            case "g1.4" -> 80_000;   // 80 GB
-            default -> 20_000;       // 20 GB
+            case "t3.micro" -> 20_000;
+            case "t3.small" -> 30_000;
+            case "t3.medium" -> 40_000;
+            case "t3.large" -> 80_000;
+            default -> 20_000;
         };
     }
 
@@ -84,8 +92,10 @@ public class FlavorMapper {
      */
     public static long getMipsPerPe(String flavor) {
         return switch (flavor) {
-            case "g1.2" -> 2000;
-            case "g1.4" -> 2500;
+            case "t3.micro" -> 1000;
+            case "t3.small" -> 1500;
+            case "t3.medium" -> 2000;
+            case "t3.large" -> 2500;
             default -> 1500;
         };
     }

@@ -9,14 +9,14 @@ import java.util.regex.Pattern;
  * Parser für Terraform Ressourcen (resource Blöcke).
  *
  * Beispiel:
- * resource "stackit_server" "app" {
+ * resource "aws_server" "app" {
  *   name   = "bottletube-app"
  *   flavor = "g1.2"
  * }
  *
  * Ziel:
  * → Extrahiert:
- *    - type  (z. B. stackit_server)
+ *    - type  (z. B. aws_instance)
  *    - name  (z. B. app)
  *    - Attribute (key=value)
  *
@@ -30,7 +30,7 @@ public class TerraformResourceParser {
      * Erkennt den Start eines resource-Blocks.
      *
      * Beispiel:
-     * resource "stackit_server" "app" {
+     * resource "aws_instance" "app" {
      */
     private static final Pattern RESOURCE_HEADER_PATTERN =
             Pattern.compile("resource\\s+\"([^\"]+)\"\\s+\"([^\"]+)\"\\s*\\{");

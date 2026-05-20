@@ -7,12 +7,12 @@ import java.util.Map;
  * Repräsentiert eine einzelne Terraform-Ressource.
  *
  * Beispiel aus Terraform:
- * resource "stackit_server" "app" {
+ * resource "aws_server" "app" {
  *   name   = "bottletube-app"
  *   flavor = "g1.2"
  * }
  *
- * → type = "stackit_server"
+ * → type = "aws_instance"
  * → name = "app"
  * → attributes = { name=bottletube-app, flavor=g1.2 }
  *
@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class TerraformResource {
 
-    // Terraform Ressourcentyp (z. B. stackit_server)
+    // Terraform Ressourcentyp (z. B. aws_instance)
     private final String type;
 
     // Terraform Ressourcenname (z. B. "app")

@@ -19,47 +19,41 @@ public class CapabilityReportFactory {
      */
     public static CapabilityReport createDefaultReport() {
         return new CapabilityReport(
-
-                // Unterstützte Terraform-Ressourcen und Features
                 List.of(
-                        "stackit_server",                      // Compute → VM
-                        "stackit_postgresqlflex_instance",     // DB → vorhanden
-                        "stackit_objectstorage_bucket",        // Storage → vorhanden
-                        "stackit_loadbalancer",                // LB → abstrahiert
-                        "variable defaults",                   // Variablenwerte
-                        "locals",                              // lokale Variablen
-                        "simple var/local interpolation"       // einfache Auflösung
+                        "aws_instance",
+                        "aws_db_instance",
+                        "aws_s3_bucket",
+                        "aws_lb",
+                        "variable defaults",
+                        "locals",
+                        "simple var/local interpolation"
                 ),
-
-                // Nicht unterstützte oder ignorierte Features
                 List.of(
-                        "stackit_key_pair",
-                        "stackit_postgresqlflex_database",
-                        "stackit_postgresqlflex_user",
-                        "stackit_objectstorage_instance",
-                        "stackit_objectstorage_object",
+                        "aws_security_group",
+                        "aws_vpc",
+                        "aws_subnet",
+                        "aws_internet_gateway",
+                        "aws_route_table",
+                        "aws_key_pair",
+                        "tags block parsing",
                         "nested blocks with full semantics",
                         "count",
                         "for_each",
                         "modules",
                         "dynamic blocks"
                 ),
-
-                // Abbildung von Terraform auf Simulation
                 List.of(
-                        "Compute nodes as CloudSim VMs",
-                        "Database presence as additional request penalty",
-                        "Object storage presence as additional request penalty",
+                        "EC2 instances as CloudSim VMs",
+                        "RDS presence as additional request penalty",
+                        "S3 presence as additional request penalty",
                         "Horizontal scaling through VM count",
                         "Mixed BottleTube request types"
                 ),
-
-                // Grundsätzliche Einschränkungen
                 List.of(
                         "No full Terraform evaluation engine",
-                        "No provider-complete STACKIT support",
-                        "No exact database service emulation",
-                        "No exact object storage/CDN/network latency model",
+                        "No complete AWS provider support",
+                        "No exact RDS service emulation",
+                        "No exact S3 or network latency model",
                         "Load balancer is abstracted via broker scheduling",
                         "Unsupported resources are ignored, not transformed"
                 )

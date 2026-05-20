@@ -14,8 +14,8 @@ public class CapabilityReport {
     /**
      * Liste der unterstützten Terraform-Ressourcen und Features.
      * Beispiel:
-     * - stackit_server
-     * - stackit_loadbalancer
+     * - aws_instance
+     * - aws_lb
      * - variable defaults
      */
     private final List<String> supportedTerraformResources;
