@@ -65,13 +65,14 @@ public class ResultExporter {
         StringBuilder csv = new StringBuilder();
 
         // Header-Zeile
-        csv.append("scenario,architecture,workload,vm_count,finished_cloudlets,static_asset_count,gallery_view_count,image_detail_count,image_upload_count,average_finish_time,max_finish_time\n");
+        csv.append("scenario,architecture,workload,network_state,vm_count,finished_cloudlets,static_asset_count,gallery_view_count,image_detail_count,image_upload_count,average_finish_time,max_finish_time\n");
 
         // Datenzeilen
         for (ScenarioResult result : results) {
             csv.append(result.getScenarioName()).append(",")
                     .append(result.getArchitectureLabel()).append(",")
                     .append(result.getWorkloadLabel()).append(",")
+                    .append(result.getNetworkState()).append(",")
                     .append(result.getVmCount()).append(",")
                     .append(result.getFinishedCloudlets()).append(",")
                     .append(result.getStaticAssetCount()).append(",")

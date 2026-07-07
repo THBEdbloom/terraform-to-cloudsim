@@ -156,6 +156,23 @@ public class InfrastructureToCloudSim {
 
                 long appLength = requestProfile.getBaseLength();
 
+                // Netzwerkzustand berücksichtigen
+                switch (SimulationConfig.NETWORK_STATE) {
+
+                    case DEGRADED -> appLength += 3000;
+
+                    case OUTAGE -> {
+                        // Requests mit DB oder Storage können nicht verarbeitet werden
+                        if (requestProfile.getDbQueryCount() > 0 || !model.getStorageNodes().isEmpty()) {
+                            continue;
+                        }
+                    }
+
+                    case NORMAL -> {
+                        // keine Änderung
+                    }
+                }
+
                 if (!model.getStorageNodes().isEmpty()) {
                     appLength += requestProfile.getStoragePenalty();
                 }

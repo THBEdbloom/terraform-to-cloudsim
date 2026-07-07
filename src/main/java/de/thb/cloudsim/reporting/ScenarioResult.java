@@ -40,6 +40,8 @@ public class ScenarioResult {
     private final int imageDetailCount;
     private final int imageUploadCount;
 
+    private final String networkState;
+
     /**
      * Konstruktor setzt alle Metriken eines Szenarios.
      */
@@ -47,6 +49,7 @@ public class ScenarioResult {
             String scenarioName,
             String architectureLabel,
             String workloadLabel,
+            String networkState,
             int vmCount,
             int finishedCloudlets,
             double averageFinishTime,
@@ -59,6 +62,7 @@ public class ScenarioResult {
         this.scenarioName = scenarioName;
         this.architectureLabel = architectureLabel;
         this.workloadLabel = workloadLabel;
+        this.networkState = networkState;
         this.vmCount = vmCount;
         this.finishedCloudlets = finishedCloudlets;
         this.averageFinishTime = averageFinishTime;
@@ -122,5 +126,9 @@ public class ScenarioResult {
     // Getter für Anzahl IMAGE_UPLOAD Requests
     public int getImageUploadCount() {
         return imageUploadCount;
+    }
+
+    public String getNetworkState() {
+        return networkState;
     }
 }

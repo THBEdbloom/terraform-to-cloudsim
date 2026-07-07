@@ -26,4 +26,6 @@ public class SimulationConfig {
      * → Sollte für größere Simulationen deaktiviert bleiben (Performance + Übersicht)
      */
     public static final boolean PRINT_CLOUDLET_DETAILS = false;
+    
+    public static final NetworkState NETWORK_STATE = NetworkState.DEGRADED;
 }

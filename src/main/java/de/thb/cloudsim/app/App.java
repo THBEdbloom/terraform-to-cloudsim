@@ -14,6 +14,7 @@ import de.thb.cloudsim.workload.RequestProfile;
 import de.thb.cloudsim.workload.RequestType;
 import de.thb.cloudsim.workload.WorkloadFactory;
 import de.thb.cloudsim.workload.WorkloadProfile;
+import de.thb.cloudsim.simulation.SimulationConfig;
 
 import java.util.List;
 
@@ -228,6 +229,7 @@ public class App {
                 scenarioName,
                 architectureLabel,
                 workloadLabel,
+                SimulationConfig.NETWORK_STATE.name(),
                 summary.getVmCount(),
                 summary.getCloudletCount(),
                 summary.getAverageFinishTime(),
